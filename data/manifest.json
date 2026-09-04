@@ -1,0 +1,15 @@
+{
+ "source": "data.gov.il package tqhe",
+ "resourceId": "8c0f314f-583d-48b6-9f5f-4483d95f6848",
+ "fetchedAt": "2026-08-29",
+ "totalQuestions": 1273,
+ "withImages": 556,
+ "byCategory": {
+  "TrafficLaws": 501,
+  "Signs": 361,
+  "Safety": 305,
+  "VehicleKnowledge": 106
+ },
+ "quarantined": [],
+ "license": "other-open (Ministry of Transport)"
+}

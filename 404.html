@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <!-- Searched phrase first, brand second. The name is a verb — "to pass" —
+         and names the outcome, not the exam in the way, so these meta tags
+         carry the keyword instead. The title leads with it because for a
+         WebAssembly app the body is a loading splash: what a search engine
+         reliably reads is exactly this.
+
+         BOTH spellings of the word appear below, deliberately. Hebrew writes it
+         תיאוריה (full) and תאוריה (defective), people search both, and covering
+         only one would miss half of them. The product itself uses the full
+         spelling; the defective one lives here, where it does its work. -->
+    <title>הכנה למבחן התיאוריה — לעבור</title>
+    <meta name="description" content="הכנה למבחן התיאוריה מהמאגר הרשמי של משרד התחבורה. מבחני תאוריה ותיאוריה לרישיון B, תרגול לפי נושא, סימולציית מבחן אמיתית וחזרה מתוזמנת — עובד גם ללא אינטרנט." />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="הכנה למבחן התיאוריה — לעבור" />
+    <meta property="og:description" content="מבחני תיאוריה (תאוריה) לרישיון B מהמאגר הרשמי של משרד התחבורה, עם סימולציית מבחן וחזרה מתוזמנת." />
+    <meta property="og:locale" content="he_IL" />
+    <!-- A shared link showed no image at all before this. The delivered logo is
+         transparent, so it is composited onto the brand canvas rather than
+         linked directly — see scripts/make_icons.py.
+
+         ABSOLUTE, not relative. WhatsApp and Facebook resolve og:image against
+         nothing and simply drop a relative one, so the preview comes back with
+         no image and nothing says why. The host is hard-coded because there is
+         one deployment; deploy_pages.sh asserts it still matches the site it is
+         publishing to, so moving the URL fails the deploy instead of quietly
+         shipping a blank preview. -->
+    <meta property="og:url" content="https://shimonel.github.io/bederech-larishayon/" />
+    <meta property="og:image" content="https://shimonel.github.io/bederech-larishayon/og-image.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="לעבור — אפליקציית הכנה למבחן תיאוריה" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <base href="/bederech-larishayon/" />
+    <!-- Required by the publish step's asset rewriter; dropping either leaves
+         the boot script's fingerprint placeholder literal and it 404s. -->
+    <link href="_framework/dotnet.1m8ne5qy1j.js" rel="preload" as="script" fetchpriority="high" crossorigin="anonymous" integrity="sha256-Wa0lbmjg88UDtkFS4uAGHBa4gL2CsEkDQ+wgFdgm4mQ=" />
+    <!-- Before the stylesheet, and deliberately blocking: it stamps data-theme
+         on <html> so the very first paint is already the right palette. -->
+    <script src="js/theme.js"></script>
+    <!-- Also in head, and for a similar reason: beforeinstallprompt fires on the
+         browser's schedule, often before .NET has booted, and a listener
+         registered later just misses it. -->
+    <script src="js/install.js"></script>
+    <link rel="stylesheet" href="css/app.css" />
+    <!-- PNG only now. The SVG that used to lead here drew the letter in Arial,
+         while every shipped icon uses the designer's Heebo Black glyph — two
+         marks that do not match is worse than one that cannot scale, and the
+         handoff ships the sizes a favicon actually needs. -->
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon.png" />
+    <link href="manifest.webmanifest" rel="manifest" />
+    <!-- Square and full-bleed on purpose: iOS applies its own rounding, and a
+         pre-rounded icon ends up with black corners outside our radius. -->
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+    <meta name="theme-color" content="#ffffff" />
+    <script type="importmap">{
+  "imports": {
+    "./_framework/blazor.webassembly.js": "./_framework/blazor.webassembly.w3qd1tpl0e.js",
+    "./_framework/dotnet.js": "./_framework/dotnet.1m8ne5qy1j.js",
+    "./_framework/dotnet.native.js": "./_framework/dotnet.native.f6au55281r.js",
+    "./_framework/dotnet.runtime.js": "./_framework/dotnet.runtime.zbexyp8zrs.js"
+  },
+  "scopes": {},
+  "integrity": {
+    "./_framework/blazor.webassembly.js": "sha256-lDXsDYFgm62F+YUvxES7IOTCXYpiHpU3uR45YdC6mq4=",
+    "./_framework/blazor.webassembly.w3qd1tpl0e.js": "sha256-lDXsDYFgm62F+YUvxES7IOTCXYpiHpU3uR45YdC6mq4=",
+    "./_framework/dotnet.1m8ne5qy1j.js": "sha256-Wa0lbmjg88UDtkFS4uAGHBa4gL2CsEkDQ+wgFdgm4mQ=",
+    "./_framework/dotnet.js": "sha256-Wa0lbmjg88UDtkFS4uAGHBa4gL2CsEkDQ+wgFdgm4mQ=",
+    "./_framework/dotnet.native.f6au55281r.js": "sha256-Bwi4xtulzypNALW/WGvGBYL57pucbPJmMAhq3MXBhsw=",
+    "./_framework/dotnet.native.js": "sha256-Bwi4xtulzypNALW/WGvGBYL57pucbPJmMAhq3MXBhsw=",
+    "./_framework/dotnet.runtime.js": "sha256-MZMguyke9CroSQl+L/SHIGFkPTD+LtYGXkXjAvwWx40=",
+    "./_framework/dotnet.runtime.zbexyp8zrs.js": "sha256-MZMguyke9CroSQl+L/SHIGFkPTD+LtYGXkXjAvwWx40="
+  }
+}</script>
+</head>
+
+<body>
+    <div id="app">
+        <div class="boot-splash">
+            <div class="boot-spinner"></div>
+            <p>טוען את מאגר השאלות...</p>
+        </div>
+    </div>
+
+    <div id="blazor-error-ui" data-nosnippet>
+        אירעה שגיאה בלתי צפויה.
+        <a href="." class="reload">רענון</a>
+        <span class="dismiss">🗙</span>
+    </div>
+
+    <!-- Offered, never forced: reloading on our own could throw away an exam
+         in progress. -->
+    <div id="update-ui" hidden>
+        <span>גרסה חדשה זמינה.</span>
+        <button type="button" onclick="location.reload()">רענן</button>
+    </div>
+
+    <script src="js/celebrate.js"></script>
+    <script src="js/backup.js"></script>
+    <script src="js/offline.js"></script>
+    <script src="_framework/blazor.webassembly.w3qd1tpl0e.js"></script>
+    <script>
+        (function () {
+            if (!('serviceWorker' in navigator)) return;
+            // Captured before registering: null on a first-ever visit, so the
+            // very first hand-over is not mistaken for an update.
+            var hadController = !!navigator.serviceWorker.controller;
+            navigator.serviceWorker.addEventListener('controllerchange', function () {
+                if (!hadController) return;
+                var ui = document.getElementById('update-ui');
+                if (ui) ui.hidden = false;
+            });
+            navigator.serviceWorker.register('service-worker.js', { updateViaCache: 'none' });
+        })();
+    </script>
+</body>
+
+</html>

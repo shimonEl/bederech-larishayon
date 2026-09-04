@@ -1,0 +1,698 @@
+/* TheoryPrep — single stylesheet, mobile-first, RTL. */
+
+/* Two palettes, one set of names. Every colour on the page comes from a token
+   here — a literal anywhere else is a colour that only works in one theme.
+   <html> always carries a RESOLVED data-theme ("light" or "dark"), stamped by
+   js/theme.js before the first paint, so there is exactly one dark block rather
+   than a prefers-color-scheme copy of it that can drift. */
+/* Colours come from design_handoff_app_icon/README.md — the delivered tokens,
+   not an approximation of the logo. The brand blue and green are the plate and
+   the wordmark, so the app and its icon are the same object. */
+:root, :root[data-theme="light"] {
+    --primary: #1b5187;              /* the plate blue */
+    --primary-dark: #123a63;
+    /* The brand green doubles as the success colour rather than a stock green:
+       the palette has one green in it and this is that green. */
+    --ok: #2b7a4b;
+    --ok-bg: #e6f2ea;
+    --bad: #c62828;                  /* the brand has no red; this is functional */
+    --bad-bg: #ffebee;
+    --surface: #ffffff;
+    --bg: #f4f5f3;                   /* --canvas */
+    --text: #171a17;                 /* --ink */
+    --muted: #5c625c;                /* --ink-muted */
+    --border: #e3e5e1;
+    --marking: #f5c63d;   /* badge gold — functional, deliberately not a brand colour */
+
+    --on-accent: #ffffff;                    /* text sitting on --primary */
+    --on-accent-soft: rgb(255 255 255 / 0.28);  /* a pill inside such a button */
+    --accent-soft: #e7eef6;                  /* selected/hovered tint of the blue */
+    /* The bar is WHITE here, per the handoff: it carries the full-colour logo,
+       which cannot sit on the blue. The blue bar is the dark theme's. */
+    --topbar-bg: #ffffff;
+    --topbar-text: #171a17;
+    --topbar-rule: #e3e5e1;                  /* dividers inside the bar */
+    --topbar-hover: rgb(23 26 23 / 0.06);
+    --warn-bg: #fff8e1;                      /* the warm "read this" box */
+    --warn-lead: #7a5200;
+    --warn-text: #5c4200;
+    --badge-bg: #fff3e0;
+    /* Darker than the #e65100 this started as: on the warm tint that was 3.46:1,
+       under the 4.5 small text needs. Measured, not guessed — 5.14:1. */
+    --badge-text: #b83e00;
+    --switch-off: #cfd6df;
+    --shadow: rgb(0 0 0 / 0.2);
+
+    --radius: 12px;
+}
+
+:root[data-theme="dark"] {
+    /* The accent lightens: the plate blue on a dark ground is unreadable, so it
+       moves up the scale and the text on it goes dark instead of white. Both
+       are the brand hues raised, not different colours. */
+    --primary: #7aa9dc;
+    --primary-dark: #a8c8e8;
+    --ok: #5fa87a;
+    --ok-bg: #16301f;
+    --bad: #ef5350;
+    /* Deep enough for --bad to clear 4.5:1 on it (4.72): the error bar paints
+       red on this pair, not the usual body text. */
+    --bad-bg: #331717;
+    --surface: #1b2129;
+    --bg: #12161c;
+    --text: #e6eaf0;
+    --muted: #9aa7b5;
+    --border: #2f3945;
+    --marking: #f5c63d;   /* holds on both grounds; the one colour that carries over */
+
+    --on-accent: #0d1520;
+    --on-accent-soft: rgb(0 0 0 / 0.22);
+    --accent-soft: #16304d;
+    /* The brand blue exactly, which is also what the handoff calls the dark
+       bar — so the dark theme's header and the app icon are the same colour,
+       and it carries the white knockout logo the handoff ships for it. */
+    --topbar-bg: #1b5187;
+    --topbar-text: #ffffff;
+    --topbar-rule: rgb(255 255 255 / 0.18);
+    --topbar-hover: rgb(255 255 255 / 0.1);
+    --warn-bg: #2e2610;
+    --warn-lead: #f0cf7a;
+    --warn-text: #e0d3ab;
+    --badge-bg: #3a2413;
+    --badge-text: #ffb74d;
+    --switch-off: #3b4552;
+    --shadow: rgb(0 0 0 / 0.5);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+    margin: 0;
+    padding: 0;
+    font-family: "Segoe UI", "Arial Hebrew", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 16px;
+}
+
+h1 { font-size: 1.5rem; margin: 0.5rem 0; }
+/* FocusOnNavigate moves focus to the h1 after every navigation so screen
+   readers announce the new page. The heading carries tabindex="-1", so it can
+   only ever be focused programmatically — never by Tab — which means a visible
+   ring there can never be the result of a deliberate keyboard action. It just
+   draws a box that reads as an editable field. The focus stays; the ring goes. */
+h1:focus, h1:focus-visible { outline: none; }
+h2 { font-size: 1.15rem; margin: 1.2rem 0 0.6rem; }
+.sub-heading { font-size: 1rem; font-weight: 600; color: var(--muted); margin: 1rem 0 0.5rem; }
+
+/* --- boot splash --- */
+.boot-splash {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    min-height: 80vh; gap: 1rem; color: var(--muted);
+}
+.boot-spinner {
+    width: 42px; height: 42px; border-radius: 50%;
+    border: 4px solid var(--border); border-top-color: var(--primary);
+    animation: spin 0.9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* --- layout --- */
+.topbar {
+    background: var(--topbar-bg); color: var(--topbar-text);
+    position: sticky; top: 0; z-index: 10;
+    /* The drop shadow, plus a hairline of the bar's OWN colour to each side.
+       At a fractional device pixel ratio the layout viewport can come out a
+       fraction narrower than the screen — 412.68 against 413 on a Galaxy S20
+       Ultra, which runs at 3.5 — so a full-width band stops just short of the
+       edge and the page behind it shows as a pale line down the side.
+       A shadow is the right tool: unlike a negative margin or an outline it
+       paints outside the box without adding to the scrollable area, so closing
+       the seam cannot introduce sideways scrolling. */
+    box-shadow: 0 2px 6px var(--shadow),
+                2px 0 0 var(--topbar-bg), -2px 0 0 var(--topbar-bg);
+    /* The handoff's light bar is white on a near-white canvas, so the rule is
+       what separates them; in the dark theme the colour does that already and
+       the border is the same token as the bar's own dividers. */
+    border-bottom: 1px solid var(--topbar-rule);
+}
+.topbar-inner {
+    max-width: 860px; margin: 0 auto; padding: 0 0.75rem;
+    display: flex; align-items: center; gap: 0.25rem; flex-wrap: wrap;
+}
+.topbar a {
+    color: var(--topbar-text); text-decoration: none; padding: 0.7rem 0.6rem; display: inline-block;
+    border-bottom: 3px solid transparent; font-size: 0.95rem;
+}
+.topbar a.active { border-bottom-color: var(--topbar-text); font-weight: 600; }
+.topbar .brand {
+    margin-inline-end: auto; display: inline-flex; align-items: center;
+    border-bottom-color: transparent; padding-block: 0.45rem;
+}
+.topbar .brand.active { border-bottom-color: transparent; }
+
+/* The logo IS the wordmark, so the bar carries no separate app-name text.
+   34px per the handoff; the two files are swapped rather than filtered, because
+   a CSS filter flattens the plate in the colour version to a white blob — the
+   white asset has the ל knocked out so the bar shows through it. */
+.brand-logo { height: 34px; width: auto; display: block; }
+.brand-logo-white { display: none; }
+:root[data-theme="dark"] .brand-logo-colour { display: none; }
+:root[data-theme="dark"] .brand-logo-white { display: block; }
+.nav-links { display: flex; flex-wrap: wrap; justify-content: flex-end; }
+
+/* --- hamburger, phones only --- */
+.nav-toggle {
+    display: none; background: none; border: 0; cursor: pointer;
+    padding: 0.55rem 0.35rem; margin-inline-start: auto;
+    flex-direction: column; gap: 5px; width: 2.6rem;
+}
+.nav-toggle span {
+    display: block; height: 2px; background: var(--topbar-text); border-radius: 2px;
+    transition: transform 0.18s ease, opacity 0.18s ease;
+}
+/* Bars fold into an X while the panel is open. */
+.nav-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav-toggle.open span:nth-child(2) { opacity: 0; }
+.nav-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+@media (max-width: 700px) {
+    .nav-toggle { display: flex; }
+    .topbar .brand { margin-inline-end: 0; }
+    .nav-links {
+        display: none; flex-basis: 100%; flex-direction: column;
+        align-items: stretch; padding-bottom: 0.4rem;
+    }
+    .nav-links.open { display: flex; }
+    .nav-links a {
+        /* Tokens now, not white alpha. The light bar became WHITE with the
+           handoff, and a white-alpha divider on a white bar is invisible —
+           these lines were correct only while the bar was blue in both themes. */
+        border-bottom: 1px solid var(--topbar-rule);
+        border-inline-start: 3px solid transparent;
+        padding: 0.75rem 0.6rem;
+    }
+    .nav-links a.active {
+        border-bottom-color: var(--topbar-rule);
+        border-inline-start-color: var(--topbar-text);
+        background: var(--topbar-hover);
+    }
+    .nav-links a:last-child { border-bottom: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .nav-toggle span { transition: none; }
+}
+
+/* 860px rather than 760: a 350px image column beside the answers needs the room,
+   and below that width the card falls back to stacking anyway. */
+.page { max-width: 860px; margin: 0 auto; padding: 1rem 0.9rem 3rem; }
+.subtitle { color: var(--muted); margin-top: 0; }
+
+
+/* --- buttons --- */
+.btn {
+    display: inline-flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 0.15rem; border: none; border-radius: var(--radius); cursor: pointer;
+    padding: 0.7rem 1.3rem; font-size: 1rem; font-family: inherit;
+    text-decoration: none; text-align: center; color: var(--on-accent); background: var(--primary);
+}
+.btn:hover { filter: brightness(1.08); }
+.btn small { font-weight: 400; opacity: 0.85; font-size: 0.8rem; }
+.btn-primary { background: var(--primary); }
+/* An outlined button, not a filled grey one. It used to fill with --muted, and
+   that token is now the handoff's --ink-muted: a colour meant for text set
+   down, which as a large fill reads murky and belongs to no part of the brand.
+   Outlined also states the hierarchy better — the blue is the recommended
+   action, and everything beside it is available rather than competing. */
+.btn-secondary {
+    background: var(--surface); color: var(--text);
+    border: 1px solid var(--border); font-weight: 600;
+}
+.btn-secondary:hover { filter: none; background: var(--accent-soft); border-color: var(--primary); }
+.btn-secondary:disabled:hover { background: var(--surface); border-color: var(--border); }
+.btn-danger { background: var(--bad); }
+.btn-quiet {
+    background: transparent; color: var(--muted);
+    border: 1px solid var(--border); font-weight: 400;
+}
+.btn-quiet:hover { filter: none; color: var(--bad); border-color: var(--bad); }
+.btn-big { padding: 1rem 1.5rem; font-size: 1.1rem; font-weight: 600; flex: 1; }
+.btn:disabled { opacity: 0.45; cursor: default; }
+
+/* Buttons that carry a chevron sit on one line rather than stacking. */
+.btn-row { flex-direction: row; gap: 0.5rem; }
+.chev {
+    width: 0.8em; height: 0.8em; flex: none;
+    /* optical: a chevron's ink sits above its box centre next to a cap height */
+    margin-block-start: 0.06em;
+}
+.chev-back { transform: scaleX(-1); }
+
+/* Four small actions, the only way into the learning screens. A grid rather
+   than a wrapping flex row: wrapped buttons of unequal width right-align in a
+   right-to-left document and leave a ragged gap down the left, which reads as
+   a page that is not centred. Equal columns sit flush to both edges and line
+   up with the topic cards below. Two columns on a phone, four on a desktop. */
+.actions {
+    display: grid; gap: 0.5rem; margin: 1rem 0 0.6rem;
+    grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+}
+.action-btn {
+    flex-direction: row; gap: 0.4rem;
+    padding: 0.5rem 0.6rem; font-size: 0.9rem; font-weight: 600;
+}
+/* The pill is white-on-accent inside the blue button. The secondary button is
+   now a white surface, where that vanishes — the same failure as the menu
+   dividers, and from the same cause: a token that was only ever right while
+   every button it sat in was filled with a colour. */
+.btn-secondary .count-badge { background: var(--accent-soft); color: var(--primary-dark); }
+.count-badge {
+    background: var(--on-accent-soft); border-radius: 999px;
+    padding: 0 0.4rem; font-size: 0.8rem; font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Locked: plainly unavailable, but still inviting the click that explains it. */
+.action-btn.is-locked {
+    background: none; color: var(--muted);
+    border: 1px dashed var(--border); font-weight: 400;
+}
+.action-btn.is-locked:hover { filter: none; border-color: var(--muted); }
+
+.lock-note {
+    margin: 0 0 1rem; padding: 0.6rem 0.85rem;
+    background: var(--warn-bg); border: 1px solid var(--marking);
+    border-radius: 10px; color: var(--warn-text); font-size: 0.95rem;
+}
+.start-hint { margin: 0 0 1.2rem; color: var(--primary); font-weight: 600; }
+
+/* Always the last thing on a practice screen, including its empty states —
+   a learner with nothing to do still needs the way out. */
+.home-link { display: flex; justify-content: center; margin: 2rem 0 0.5rem; }
+
+/* --- exam date --- */
+.exam-countdown {
+    display: inline-block; text-decoration: none; font-weight: 600;
+    background: var(--accent-soft); color: var(--primary-dark);
+    border: 1px solid var(--primary); border-radius: 999px; padding: 0.35rem 0.9rem;
+}
+/* Unset is the state that needs the learner to DO something, so it has to read
+   as an invitation, not as a greyed-out label. Dashed border = "empty slot". */
+.exam-countdown.unset {
+    background: var(--surface); color: var(--primary);
+    border-style: dashed; border-color: var(--primary);
+}
+.exam-countdown.unset:hover { background: var(--accent-soft); }
+.setting-row { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; }
+
+/* Three-way choice as one connected control, so it reads as "pick one of these"
+   rather than as three separate buttons. */
+.segmented {
+    display: inline-flex; margin: 0.2rem 0 0.5rem;
+    border: 1px solid var(--border); border-radius: 999px;
+    background: var(--surface); overflow: hidden;
+}
+.segment {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 0.45rem 1.1rem; cursor: pointer; font-size: 0.95rem;
+    color: var(--muted); white-space: nowrap;
+    border-inline-start: 1px solid var(--border);
+    transition: background 0.15s ease, color 0.15s ease;
+}
+.segment:first-child { border-inline-start: 0; }
+/* The radio itself is the accessible control, and stays focusable — only its
+   box is hidden, never display:none, which would take it out of the tab order. */
+.segment input { position: absolute; opacity: 0; width: 0; height: 0; }
+.segment.active { background: var(--primary); color: var(--on-accent); font-weight: 600; }
+.segment:hover:not(.active) { background: var(--accent-soft); color: var(--primary-dark); }
+.segment:focus-within { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+    .segment { transition: none; }
+}
+.toggle-row {
+    display: flex; align-items: center; gap: 0.6rem; cursor: pointer;
+    padding: 0.5rem 0; font-size: 1rem;
+}
+/* A sliding ON/OFF switch, painted onto the native checkbox rather than built
+   from divs — the control keeps its keyboard behaviour, focus ring and change
+   event, and only its appearance is replaced. Sized in rem so it scales with
+   the page, and never shrinks when the label wraps beside it. */
+.toggle-row input {
+    appearance: none; -webkit-appearance: none;
+    position: relative; flex: none; cursor: pointer;
+    width: 3rem; height: 1.65rem; margin: 0;
+    border-radius: 999px; border: 1px solid var(--border);
+    background: var(--switch-off);
+    transition: background 0.18s ease, border-color 0.18s ease;
+}
+/* Logical inset, so the knob rests on the start side and travels to the end in
+   either direction. The app is RTL, where "start" is the right. */
+.toggle-row input::after {
+    content: ""; position: absolute; top: 0.15rem; inset-inline-start: 0.15rem;
+    width: 1.25rem; height: 1.25rem; border-radius: 50%;
+    /* The knob stays white in both themes: it reads on the grey off-track and
+       on the green on-track alike, so it is not a theme-dependent colour. */
+    background: #fff; box-shadow: 0 1px 3px rgb(0 0 0 / 0.3);
+    transition: inset-inline-start 0.18s ease;
+}
+.toggle-row input:checked { background: var(--ok); border-color: var(--ok); }
+.toggle-row input:checked::after { inset-inline-start: 1.5rem; }
+.toggle-row input:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+    .toggle-row input, .toggle-row input::after { transition: none; }
+}
+
+/* The sound toggle carries a replay button beside it. Its own row rather than
+   inside the <label>, so pressing it cannot also flip the checkbox. */
+.toggle-row-group { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+.btn-sample {
+    padding: 0.3rem 0.75rem; font-size: 0.85rem; font-weight: 400;
+    background: transparent; color: var(--primary);
+    border: 1px solid var(--border); border-radius: 999px;
+}
+.btn-sample:hover { filter: none; border-color: var(--primary); background: var(--accent-soft); }
+/* The target: a small day-count field, the computed date beside it, and the
+   confirming button. Wraps as a row on phones like every other setting row. */
+.target-row { align-items: center; }
+.target-days {
+    display: inline-flex; align-items: center; gap: 0.45rem;
+    color: var(--text); font-size: 1rem;
+}
+.target-days input {
+    width: 4.6rem; padding: 0.55rem 0.6rem; text-align: center;
+    font-family: inherit; font-size: 1.05rem; font-variant-numeric: tabular-nums;
+    border: 1px solid var(--border); border-radius: 10px;
+    background: var(--surface); color: var(--text);
+}
+.target-days input:focus { outline: none; border-color: var(--primary); }
+.target-date { color: var(--muted); font-size: 0.95rem; }
+.target-date b { color: var(--text); font-variant-numeric: tabular-nums; }
+
+/* --- home category grid --- */
+.category-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+.category-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 0.9rem; text-decoration: none; color: var(--text);
+    display: flex; align-items: center; gap: 0.75rem;
+    transition: box-shadow 0.15s, border-color 0.15s;
+}
+.category-card:hover { box-shadow: 0 3px 10px var(--shadow); border-color: var(--primary); }
+.cat-icon { width: 34px; height: 34px; flex: none; color: var(--primary); }
+.cat-body { display: flex; flex-direction: column; gap: 0.3rem; min-width: 0; flex: 1; }
+.cat-name { font-weight: 700; }
+.cat-progress { color: var(--muted); font-size: 0.82rem; }
+
+/* --- progress bar with a chevron head --- */
+.bar { position: relative; display: block; }
+.bar-track {
+    display: block; background: var(--border);
+    border-radius: 999px; height: 10px; overflow: hidden;
+}
+.bar-compact .bar-track { height: 6px; }
+.bar-fill { display: block; background: var(--primary); height: 100%; width: var(--pct); }
+
+/* Rides the leading edge of the fill. inset-inline-start keeps it correct in
+   both directions; the negative logical margin centres it on that edge. */
+.bar-head {
+    position: absolute; top: 50%;
+    inset-inline-start: var(--pct);
+    margin-inline-start: -4px;
+    transform: translateY(-50%);
+    width: 8px; height: 8px;
+    display: flex; align-items: center; justify-content: center;
+    pointer-events: none;
+}
+.bar-head::before {
+    content: ""; display: block; width: 5px; height: 5px;
+    border-top: 2px solid var(--primary);
+    border-inline-start: 2px solid var(--primary);
+    transform: rotate(-45deg);
+}
+
+/* --- question card --- */
+.question-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 1rem; margin: 0.75rem 0;
+}
+.question-card.has-image { display: grid; gap: 0.75rem; }
+.question-figure { margin: 0; }
+/* Narrow screens: the sign goes above its question, where it is read first. */
+.question-card.has-image .question-figure { order: -1; }
+
+/* Source images are 350px wide; cap at 100% so a narrow phone never gets a
+   horizontally scrolling page, and never upscale past the native size. */
+.question-image {
+    display: block; width: auto; max-width: min(350px, 100%); max-height: 240px;
+    margin: 0 auto; border-radius: 8px;
+}
+
+/* Wide screens: question beside the image rather than under it, so the card
+   fits the viewport height and nothing has to be scrolled to answer. Source
+   order puts the body in the first column — the right one, in a right-to-left
+   document — leaving the image on the left. */
+@media (min-width: 860px) {
+    .question-card.has-image {
+        grid-template-columns: 1fr 350px;
+        gap: 1.5rem;
+        align-items: start;
+    }
+    .question-card.has-image .question-figure { order: 0; position: sticky; top: 1rem; }
+    .question-card.has-image .question-image { max-height: none; }
+}
+.question-text { font-size: 1.15rem; margin: 0 0 0.9rem; }
+.answers { display: flex; flex-direction: column; gap: 0.55rem; }
+.answer {
+    text-align: start; font-family: inherit; font-size: 1rem; cursor: pointer;
+    background: var(--bg); color: var(--text);
+    border: 2px solid var(--border); border-radius: 10px; padding: 0.7rem 0.9rem;
+}
+.answer:hover:not(:disabled) { border-color: var(--primary); }
+.answer.selected { border-color: var(--primary); background: var(--accent-soft); }
+.answer.correct { border-color: var(--ok); background: var(--ok-bg); font-weight: 600; }
+.answer.wrong { border-color: var(--bad); background: var(--bad-bg); }
+.answer:disabled { cursor: default; }
+
+/* Ruled out on the first attempt: struck through and out of play, but still
+   readable — the learner needs to see what they rejected and why it is gone. */
+.answer.eliminated {
+    text-decoration: line-through;
+    color: var(--muted);
+    background: var(--bg);
+    border-color: var(--border);
+    border-style: dashed;
+    opacity: 0.7;
+}
+
+.hint {
+    background: var(--warn-bg); border: 1px solid var(--marking);
+    border-radius: var(--radius); padding: 0.9rem 1rem; margin: 0.75rem 0;
+}
+.hint-lead { margin: 0 0 0.35rem; font-weight: 600; color: var(--warn-lead); }
+.hint-body { margin: 0; color: var(--warn-text); }
+
+.feedback { font-weight: 600; }
+.encouragement { color: var(--muted); margin: 0.4rem 0 0.8rem; }
+.streak-badge {
+    display: inline-block; margin-inline-start: 0.5rem; padding: 0.1rem 0.6rem;
+    background: var(--badge-bg); color: var(--badge-text); border-radius: 999px; font-size: 0.9rem;
+}
+
+/* --- success feedback --- */
+@keyframes answer-pop {
+    0% { transform: scale(1); }
+    45% { transform: scale(1.025); }
+    100% { transform: scale(1); }
+}
+.answer.correct.pop { animation: answer-pop 0.34s ease-out; }
+
+.confetti-host {
+    position: fixed; inset: 0; overflow: hidden;
+    pointer-events: none; z-index: 2000;
+}
+.confetti-host i { position: absolute; top: 0; border-radius: 2px; display: block; }
+
+@media (prefers-reduced-motion: reduce) {
+    .answer.correct.pop { animation: none; }
+    .boot-spinner { animation: none; }
+}
+.feedback.ok, .ok { color: var(--ok); }
+.feedback.bad, .bad { color: var(--bad); }
+.empty-state { color: var(--muted); background: var(--surface); border-radius: var(--radius); padding: 1.5rem; text-align: center; }
+.next-due { font-size: 0.9rem; }
+.next-interval { color: var(--muted); font-weight: 400; font-size: 0.9rem; }
+.study-position { color: var(--muted); font-size: 0.9rem; margin-bottom: 0; }
+
+/* --- filters --- */
+.filter-row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.chip {
+    border: 1px solid var(--border); background: var(--surface); color: var(--text);
+    border-radius: 999px; padding: 0.35rem 0.9rem; cursor: pointer; font-family: inherit; font-size: 0.9rem;
+}
+.chip.active { background: var(--primary); border-color: var(--primary); color: var(--on-accent); }
+
+/* --- exam --- */
+.exam-intro { max-width: 34rem; }
+.exam-header {
+    display: flex; justify-content: space-between; align-items: center;
+    font-weight: 600; margin-bottom: 0.5rem;
+}
+.exam-timer { font-variant-numeric: tabular-nums; }
+.exam-timer.urgent { color: var(--bad); }
+.exam-nav { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 0.5rem; }
+.exam-dot {
+    width: 34px; height: 30px; border: 1px solid var(--border); border-radius: 6px;
+    background: var(--surface); cursor: pointer; font-family: inherit; font-size: 0.8rem;
+}
+.exam-dot.answered { background: var(--accent-soft); border-color: var(--primary); }
+.exam-dot.current { outline: 2px solid var(--primary-dark); font-weight: 700; }
+.exam-actions { display: flex; gap: 0.6rem; margin-top: 0.75rem; }
+.exam-score { font-size: 1.3rem; font-weight: 700; }
+.review-item { border-inline-start: 5px solid transparent; padding-inline-start: 0.4rem; margin-bottom: 0.5rem; }
+.review-item.review-ok { border-color: var(--ok); }
+.review-item.review-bad { border-color: var(--bad); }
+
+/* --- progress --- */
+.coverage-list { display: flex; flex-direction: column; gap: 0.6rem; }
+.coverage-row { display: grid; grid-template-columns: 7.5rem 1fr; gap: 0.2rem 0.8rem; align-items: center; }
+.coverage-name { font-weight: 600; }
+.coverage-nums { grid-column: 2; color: var(--muted); font-size: 0.85rem; }
+/* One column per day. Bars are proportional to the busiest day in the window,
+   so the shape shows rhythm rather than absolute volume. */
+.activity {
+    display: flex; align-items: flex-end; gap: 4px; height: 72px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 0.6rem;
+}
+.activity-day { flex: 1; height: 100%; display: flex; align-items: flex-end; }
+.activity-bar { width: 100%; background: var(--primary); border-radius: 3px; min-height: 2px; }
+.activity-scale {
+    display: flex; justify-content: space-between;
+    font-size: 0.8rem; margin-top: 0.35rem;
+}
+
+.exam-table { width: 100%; border-collapse: collapse; background: var(--surface); border-radius: var(--radius); }
+.exam-table th, .exam-table td { padding: 0.55rem 0.8rem; text-align: start; border-bottom: 1px solid var(--border); }
+
+.about-facts li { margin-bottom: 0.3rem; }
+
+/* --- backup --- */
+.notice {
+    background: var(--surface); border: 1px solid var(--border);
+    border-inline-start: 5px solid var(--primary);
+    border-radius: var(--radius); padding: 1rem 1.1rem; margin: 1rem 0;
+}
+.notice p { margin: 0; }
+.notice-lead { font-weight: 700; margin-bottom: 0.35rem !important; }
+.notice-action { border-inline-start-color: var(--bad); }
+.notice .warn { color: var(--bad); font-weight: 600; margin-top: 0.6rem !important; }
+.benefits { margin: 0.5rem 0 1rem; padding-inline-start: 1.2rem; }
+.benefits li { margin-bottom: 0.5rem; }
+.file-input {
+    display: block; font-family: inherit; font-size: 0.95rem;
+    padding: 0.6rem; border: 1px dashed var(--border); border-radius: 10px;
+    background: var(--surface); width: 100%; max-width: 26rem;
+}
+
+/* The home-screen strip. Gold-bordered rather than another blue card: the row
+   of actions above it is already blue and grey, and the badges are a different
+   kind of thing — what you have, not what to do next. */
+.badge-strip {
+    display: flex; align-items: center; gap: 0.7rem;
+    margin: 0 0 1.2rem; padding: 0.7rem 0.9rem;
+    text-decoration: none; color: var(--text);
+    background: var(--surface); border: 1px solid var(--marking);
+    border-radius: var(--radius);
+}
+.badge-strip:hover { background: var(--warn-bg); }
+.badge-strip-icons { display: flex; flex: none; gap: 0.3rem; }
+.badge-chip {
+    width: 1.8rem; height: 1.8rem; border-radius: 50%;
+    background: var(--marking); color: #3d2f00;
+    display: flex; align-items: center; justify-content: center;
+}
+.badge-chip .badge-icon { width: 1rem; height: 1rem; }
+.badge-strip-body { display: flex; flex-direction: column; gap: 0.1rem; min-width: 0; }
+.badge-strip-title { font-size: 0.95rem; font-variant-numeric: tabular-nums; }
+.badge-strip-next { font-size: 0.82rem; color: var(--muted); }
+.badge-strip .chev { margin-inline-start: auto; flex: none; color: var(--muted); }
+
+/* --- badges --- */
+.badge-tally {
+    margin: 0 0 1.2rem; color: var(--muted);
+    font-variant-numeric: tabular-nums;
+}
+.badge-grid {
+    display: grid; gap: 0.7rem; margin-bottom: 1.6rem;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+}
+.badge-card {
+    display: flex; align-items: flex-start; gap: 0.75rem;
+    padding: 0.8rem; border-radius: var(--radius);
+    background: var(--surface); border: 1px solid var(--border);
+}
+/* Earned reads as a filled, warm thing; locked is the same card drained of it,
+   so the two are obviously the same object in two states. */
+.badge-card.earned { border-color: var(--marking); }
+/* The dark brown is a literal on purpose, like the switch knob: it sits on
+   --marking, which is the one token with the same value in both themes, so a
+   second token here would be two names for one colour. */
+.badge-card.earned .badge-face { background: var(--marking); color: #3d2f00; }
+.badge-card.locked { opacity: 0.72; }
+.badge-card.locked .badge-face { background: var(--bg); color: var(--muted); }
+.badge-face {
+    flex: none; width: 3rem; height: 3rem; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+}
+.badge-icon { width: 1.6rem; height: 1.6rem; }
+.badge-body { display: flex; flex-direction: column; gap: 0.25rem; min-width: 0; }
+.badge-name { font-size: 0.98rem; }
+.badge-desc { color: var(--muted); font-size: 0.85rem; }
+.badge-status { font-size: 0.8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.badge-status.ok { color: var(--ok); font-weight: 600; }
+
+/* The moment one is earned, inline on the screen that earned it. */
+.badge-toast {
+    display: flex; align-items: center; gap: 0.7rem;
+    margin: 0.8rem 0 0; padding: 0.7rem 0.9rem;
+    background: var(--warn-bg); border: 1px solid var(--marking);
+    border-radius: var(--radius); color: var(--warn-text);
+}
+.badge-toast .badge-icon { flex: none; width: 1.8rem; height: 1.8rem; }
+.badge-toast-body { display: flex; flex-direction: column; gap: 0.15rem; min-width: 0; }
+.badge-toast-list { font-size: 0.85rem; }
+.badge-toast a {
+    color: var(--primary); font-size: 0.9rem; font-weight: 600;
+    text-decoration: none; display: inline-flex; align-items: center; gap: 0.25rem;
+}
+
+/* --- error UI --- */
+#blazor-error-ui {
+    background: var(--bad-bg); color: var(--bad); bottom: 0; box-shadow: 0 -1px 4px var(--shadow);
+    display: none; right: 0; left: 0; padding: 0.6rem 1.25rem; position: fixed; z-index: 1000;
+}
+#blazor-error-ui .dismiss { cursor: pointer; position: absolute; left: 0.75rem; top: 0.6rem; }
+
+#update-ui {
+    position: fixed; inset-inline: 0; bottom: 0; z-index: 1500;
+    display: flex; align-items: center; justify-content: center; gap: 0.8rem;
+    background: var(--primary); color: var(--on-accent); padding: 0.7rem 1rem;
+    box-shadow: 0 -2px 8px var(--shadow);
+}
+#update-ui[hidden] { display: none; }
+#update-ui button {
+    background: var(--on-accent); color: var(--primary); border: 0; border-radius: 8px;
+    padding: 0.35rem 1rem; font-family: inherit; font-size: 0.95rem;
+    font-weight: 700; cursor: pointer;
+}
+
+@media (max-width: 700px) {
+    .btn-big { padding: 0.7rem 1rem; font-size: 1rem; }
+    .btn { padding: 0.6rem 1rem; }
+}
+
+@media (max-width: 480px) {
+    .category-grid { grid-template-columns: 1fr; }
+}
