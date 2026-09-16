@@ -1,0 +1,33 @@
+{
+  "name": "לעבור",
+  "short_name": "לעבור",
+  "description": "הכנה למבחן התיאוריה מהמאגר הרשמי של משרד התחבורה. מבחני תאוריה ותיאוריה לרישיון B, תרגול לפי נושא, סימולציית מבחן וחזרה מתוזמנת — עובד גם ללא אינטרנט.",
+  "id": "./",
+  "start_url": "./",
+  "display": "standalone",
+  "dir": "rtl",
+  "lang": "he",
+  "background_color": "#f4f5f3",
+  "theme_color": "#1b5187",
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-maskable-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
+    }
+  ]
+}
